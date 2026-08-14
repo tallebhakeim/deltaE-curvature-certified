@@ -1,0 +1,63 @@
+{
+ "figure": "Fig. 6c",
+ "x": "Delta f_r / f_r,min (%)",
+ "y": "quality factor Q",
+ "subset": "sensor designs 3 and 4, mean f_r = 246 MHz",
+ "source": "A. D. Matyushov et al., Adv. Mater. Technol. 6, 2100294 (2021); values digitized from the vector content of the published figure",
+ "calibration": {
+  "tick_residual_x": 8.493828468192355e-05,
+  "tick_residual_y": 0.007674049717934395,
+  "raw_shapes": 24,
+  "unique_markers": 12
+ },
+ "points": [
+  [
+   0.03425,
+   389.37539
+  ],
+  [
+   0.0452,
+   400.4161
+  ],
+  [
+   0.05143,
+   618.68823
+  ],
+  [
+   0.14385,
+   474.30293
+  ],
+  [
+   0.22382,
+   315.28266
+  ],
+  [
+   0.23122,
+   290.64592
+  ],
+  [
+   0.34141,
+   235.23585
+  ],
+  [
+   0.51705,
+   109.97264
+  ],
+  [
+   0.52624,
+   329.71233
+  ],
+  [
+   0.63851,
+   21.42665
+  ],
+  [
+   0.91722,
+   73.02573
+  ],
+  [
+   0.92731,
+   94.051
+  ]
+ ]
+}

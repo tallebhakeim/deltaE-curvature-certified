@@ -1,0 +1,111 @@
+{
+ "response": {
+  "n_devices": 64,
+  "kappa_min": 0.2197,
+  "kappa_max": 7.3277,
+  "measured_spread": 101.3741285824942,
+  "measured_min": 0.01291,
+  "measured_max": 1.30874,
+  "deam": {
+   "v_global_pct": 5.0,
+   "rms_log10": 0.26757139814058994,
+   "rms_factor": 1.851703289748815,
+   "median_abs_dev_pct": 41.2337978394208,
+   "spread": 34.41290995513028
+  },
+  "squire": {
+   "v_global_pct": 2.0,
+   "rms_log10": 0.5511486155071812,
+   "rms_factor": 3.5575303637808138,
+   "median_abs_dev_pct": 72.41375559124384,
+   "spread": 1.5047639150255596
+  },
+  "deam_fit_free": {
+   "rms_log10": 0.28386676276350553,
+   "rms_factor": 1.922501833946801,
+   "spread": 20.428207932336278,
+   "kappa_max": 5.803453827543493
+  },
+  "published_model": {
+   "rms_factor": 2.1104537966084096,
+   "median_abs_dev_pct": 35.63550165802366,
+   "spread": 45.4664,
+   "range": [
+    1.13666,
+    0.01666
+   ]
+  },
+  "curve_range_deam": [
+   0.779708613659153,
+   0.022657444972708968
+  ],
+  "curve_range_squire": [
+   0.28287249840955275,
+   0.18996742235936778
+  ]
+ },
+ "quality_factor": {
+  "n_ensemble": 51,
+  "Q_min": 21.26326,
+  "Q_max": 704.5658,
+  "pearson_r_ensemble": -0.5927398322189997,
+  "Q0_shared": 540.0,
+  "tau_ps_per_pct": 4.0,
+  "R2_joint": 0.5288044187631682,
+  "subsets": [
+   {
+    "subset": "designs 3, 4",
+    "f_r_MHz": 246.0,
+    "n": 12,
+    "gamma_NM_refit": 0.027300893751184656,
+    "gamma_M_refit": 0.09999268448104284,
+    "gamma_NM_table2": 0.027,
+    "gamma_M_table2": 0.15,
+    "R2_paper_form": 0.7120803095593512,
+    "R2_shared_constants": 0.7074402336082491
+   },
+   {
+    "subset": "designs 7, 8",
+    "f_r_MHz": 138.0,
+    "n": 13,
+    "gamma_NM_refit": 0.017118569287783474,
+    "gamma_M_refit": 0.03423594078069585,
+    "gamma_NM_table2": 0.017,
+    "gamma_M_table2": 0.041,
+    "R2_paper_form": 0.39602398425175767,
+    "R2_shared_constants": 0.3874819513154707
+   }
+  ]
+ },
+ "detectivity": {
+  "subsets": [
+   {
+    "subset": "designs 3, 4",
+    "f_r_MHz": 246.0,
+    "n": 12,
+    "response_spread": 27.07474452554744,
+    "Q_spread": 28.874706498682716,
+    "detectivity_spread_measured": 13.010379651316851,
+    "detectivity_spread_model": 7.365985108156799,
+    "compression_measured": 2.0810111042998702,
+    "compression_model": 3.67564475463926
+   },
+   {
+    "subset": "designs 7, 8",
+    "f_r_MHz": 138.0,
+    "n": 13,
+    "response_spread": 56.72615092548647,
+    "Q_spread": 6.220369546370309,
+    "detectivity_spread_measured": 22.535998489718047,
+    "detectivity_spread_model": 18.20730095589746,
+    "compression_measured": 2.517135016288164,
+    "compression_model": 3.115571663416291
+   }
+  ],
+  "n_pooled": 25,
+  "response_spread_pooled": 56.72615092548647,
+  "detectivity_spread_pooled": 22.778322723819713,
+  "compression_pooled": 2.4903568016519007,
+  "log_correlation": -0.7061221494679144
+ }
+}
