@@ -4,8 +4,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, FancyArrow, FancyArrowPatch, Arc
 
-fig, (axA, axB) = plt.subplots(1, 2, figsize=(11, 4.2),
-                               gridspec_kw={"width_ratios": [1, 1.25]})
+fig, (axA, axB) = plt.subplots(2, 1, figsize=(5.4, 7.6),
+                               gridspec_kw={"height_ratios": [1, 1.25]})
 
 # ---------- Panel A: layer stack cross-section ----------
 axA.set_title("(a) Layer stack (cross-section)", fontsize=11)

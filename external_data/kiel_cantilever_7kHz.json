@@ -1,0 +1,14 @@
+{
+  "source": "P. Durdaut et al., Phase Sensitivity and Phase Noise of Cantilever-Type Magnetoelastic Sensors Based on the Delta-E Effect, arXiv:2003.01085; published as J. Microelectromech. Syst. 29, 1347 (2020)",
+  "doi": "10.1109/jmems.2020.3014402",
+  "kind": "increment",
+  "note": "TO VERIFY. The quality factor range (about 800 at the operating point, about 1100 in saturation, Fig. 3b) and the resonance frequency swing (Fig. 2a, axis 7400 to 7450 Hz) were reported by a literature-search agent and have NOT been read at the source by the author: the arXiv PDF could not be parsed by the tooling available. The numbers are carried here because the conclusion they support, that the law fails at kilohertz, is robust to a large reading error: the discrepancy is three orders of magnitude. Verify before citing.",
+  "mode": "first bending, cantilever",
+  "stack": "poly-Si / AlN / FeCoSiB",
+  "independent_of_matyushov_2021": false,
+  "independence_note": "Kiel group; several authors overlap with [1] (Spetzler, McCord, Faupel). Different platform, different fabrication line, frequency four decades below [1].",
+  "increments": [
+    {"f_r_Hz": 7.45e3, "Q_working_point": 800, "Q_saturation": 1100, "response_pct": 0.68,
+     "reading": "agent reading of Fig. 2a and Fig. 3b, unverified"}
+  ]
+}

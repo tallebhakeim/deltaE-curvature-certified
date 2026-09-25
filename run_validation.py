@@ -36,7 +36,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit, least_squares
 
-from deltaE import squire_E, deam_E, frequency_response
+import crossval as cv
+from deltaE import frequency_response
 from materials import MU0
 from paper_fits import keff_fit, phi_eff_fit
 
@@ -54,25 +55,22 @@ def load_measured(name):
 
 
 def model_response(kappa, model, v):
-    """Delta f_r/f_r,min (%) at the given curvatures for the requested model."""
-    out = np.empty_like(kappa, dtype=float)
-    for i, k in enumerate(kappa):
-        K = keff_fit(k) * 1e3
-        phi = phi_eff_fit(k)
-        E = deam_E(H_SWEEP, K, phi) if model == "deam" else squire_E(H_SWEEP, K, phi)
-        _, out[i] = frequency_response(H_SWEEP, E, v=v)
-    return out
+    """Delta f_r/f_r,min (%) at the given curvatures for the requested model.
+
+    Both branches are evaluated with the closed-form compliances of
+    deltaE_analytic.py.  The earlier finite-difference evaluation located the
+    equilibrium angle on a fixed 721-point grid and probed it with a stress step
+    that moved that angle by less than the grid spacing, which quantised the
+    single-domain derivative and made it collapse; see REVISION_NOTES.md.
+    """
+    return cv.predict(kappa, model, v)
 
 
-def fit_global_v(kappa_meas, resp_meas, model, grid=np.linspace(0.02, 0.20, 19)):
-    """One global active fraction, least squares on log10(response)."""
-    best = None
-    for v in grid:
-        pred = model_response(kappa_meas, model, v)
-        rms = float(np.sqrt(np.mean((np.log10(pred) - np.log10(resp_meas)) ** 2)))
-        if best is None or rms < best[1]:
-            best = (float(v), rms, pred)
-    return best
+def fit_global_v(kappa_meas, resp_meas, model, grid=None):
+    """One global active fraction, least squares on log10(response), optimised
+    continuously in log10(v) rather than on a coarse grid."""
+    v, rms = cv.fit_v(kappa_meas, resp_meas, model)
+    return float(v), float(rms), cv.predict(kappa_meas, model, v)
 
 
 def decade_spread(y):
@@ -87,14 +85,17 @@ def fit_free_branch(kap_meas, resp_meas):
     from mechanics import curvature_sweep
     from magnetoelastic import keff_phieff_vs_curvature
     from materials import default_stack
-    from deltaE import frequency_response_profile
+    from deltaE_analytic import coherent_compliance, modulus
 
     layers = default_stack(500e-9)
     sweep = curvature_sweep(layers, {"FeGaB": (45e6, 75e6, 5e6)},
                             np.linspace(0.02, 11.0, 24))
     kap, _, _, profiles = keff_phieff_vs_curvature(sweep)
-    dfr = np.array([frequency_response_profile(H_SWEEP, p, 500e-9, model="deam")[1]
-                    for p in profiles])
+    dfr = np.empty(len(profiles))
+    for i, prof in enumerate(profiles):
+        E = np.mean([modulus(coherent_compliance(H_SWEEP, prof.Keff[j], prof.phi_eff[j]))
+                     for j in range(len(prof.z))], axis=0)
+        dfr[i] = frequency_response(H_SWEEP, E, 500e-9, v=1.0)[1]
     inside = (kap >= kap_meas.min()) & (kap <= kap_meas.max())
     logi = np.interp(np.log(kap_meas), np.log(kap[inside]), np.log(dfr[inside]))
     scale = float(np.exp(np.mean(np.log(resp_meas) - logi)))
@@ -108,8 +109,8 @@ def validate_response():
     order = np.argsort(kap)
     kap, resp = kap[order], resp[order]
 
-    v_deam, rms_deam, pred_deam = fit_global_v(kap, resp, "deam")
-    v_sq, rms_sq, pred_sq = fit_global_v(kap, resp, "squire")
+    v_deam, rms_deam, pred_deam = fit_global_v(kap, resp, "averaged")
+    v_sq, rms_sq, pred_sq = fit_global_v(kap, resp, "coherent")
     k_ff, dfr_ff, rms_ff = fit_free_branch(kap, resp)
 
     # the model curve published in Fig. 10 of [1], scored on the same 64 points
@@ -120,8 +121,8 @@ def validate_response():
 
     # smooth curves for the figure, over the measured curvature range
     kk = np.linspace(kap.min(), kap.max(), 60)
-    curve_deam = model_response(kk, "deam", v_deam)
-    curve_sq = model_response(kk, "squire", v_sq)
+    curve_deam = model_response(kk, "averaged", v_deam)
+    curve_sq = model_response(kk, "coherent", v_sq)
 
     med_deam = float(np.median(np.abs(pred_deam / resp - 1.0))) * 100
     med_sq = float(np.median(np.abs(pred_sq / resp - 1.0))) * 100
@@ -131,12 +132,12 @@ def validate_response():
         "kappa_min": float(kap.min()), "kappa_max": float(kap.max()),
         "measured_spread": decade_spread(resp),
         "measured_min": float(resp.min()), "measured_max": float(resp.max()),
-        "deam": {"v_global_pct": 100 * v_deam,
+        "averaged": {"v_global_pct": 100 * v_deam,
                  "rms_log10": rms_deam,
                  "rms_factor": float(10 ** rms_deam),
                  "median_abs_dev_pct": med_deam,
                  "spread": decade_spread(curve_deam)},
-        "squire": {"v_global_pct": 100 * v_sq,
+        "coherent": {"v_global_pct": 100 * v_sq,
                    "rms_log10": rms_sq,
                    "rms_factor": float(10 ** rms_sq),
                    "median_abs_dev_pct": med_sq,
@@ -150,21 +151,21 @@ def validate_response():
                             "spread": decade_spread(
                                 v10[(k10 >= kap.min()) & (k10 <= kap.max())]),
                             "range": [float(v10[0]), float(v10[-1])]},
-        "curve_range_deam": [float(curve_deam[0]), float(curve_deam[-1])],
-        "curve_range_squire": [float(curve_sq[0]), float(curve_sq[-1])],
+        "curve_range_averaged": [float(curve_deam[0]), float(curve_deam[-1])],
+        "curve_range_coherent": [float(curve_sq[0]), float(curve_sq[-1])],
     }
 
     fig, ax = plt.subplots(figsize=(6.6, 4.3))
     ax.semilogy(kap, resp, "o", ms=5, mfc="none", mec="0.35", mew=1.0,
                 label=f"measured, {kap.size} devices [1]")
-    ax.semilogy(kk, curve_deam, "-", color="C2", lw=2.2,
-                label=(r"DEAM, single global $v=%.0f\%%$ (%s%.0f)"
-                       % (100 * v_deam, r"$\times$", stats["deam"]["spread"])))
-    ax.semilogy(kk, curve_sq, "--", color="C1", lw=2.2,
-                label=(r"single domain, $v=%.0f\%%$ (%s%.1f, saturates)"
-                       % (100 * v_sq, r"$\times$", stats["squire"]["spread"])))
+    ax.semilogy(kk, curve_sq, "-", color="C0", lw=2.2,
+                label=(r"coherent rotation, one global $v=%.1f\%%$ (%s%.0f)"
+                       % (100 * v_sq, r"$\times$", stats["coherent"]["spread"])))
+    ax.semilogy(kk, curve_deam, "--", color="C2", lw=2.0,
+                label=(r"energy-averaged domains, $v=%.1f\%%$ (%s%.0f)"
+                       % (100 * v_deam, r"$\times$", stats["averaged"]["spread"])))
     ax.semilogy(k_ff, dfr_ff, "s", color="C0", ms=4.5, alpha=0.85,
-                label="DEAM, thickness-integrated (no fitted anisotropy)")
+                label="thickness-integrated, no fitted anisotropy function")
     ax.semilogy(k10, v10, ":", color="C3", lw=2.0,
                 label=r"two-domain model of [1], $v$ fitted per device")
     ax.set_xlabel(r"curvature $\kappa$ (mm$^{-1}$)")
@@ -221,13 +222,19 @@ def validate_q():
                            "gamma_NM_table2": ref[0], "gamma_M_table2": ref[1],
                            "R2_paper_form": r2})
 
-    def resid(p):
-        inv_q0, tau = p
-        return np.concatenate([q - 1.0 / (inv_q0 + 2 * np.pi * f_r * tau * x)
+    # The two unknowns are carried as u = (1000/Q0, tau in ps) so that both are
+    # of order unity.  With the raw (1/Q0, tau in s) pair the numerical Jacobian
+    # spans nine decades, least_squares cannot move, and it returns its own
+    # starting point: that is how Q0 = 540 and tau = 4.0 ps arose in the first
+    # submission.  Rescaled, the fit converges to the same optimum from any
+    # start tried (Q0 from 300 to 2000, tau from 1 to 20 ps).
+    def resid(u):
+        q0, tau = 1000.0 / u[0], u[1] * 1e-12
+        return np.concatenate([q - 1.0 / (1.0 / q0 + 2 * np.pi * f_r * tau * x)
                                for x, q, f_r, _ in data])
 
-    sol = least_squares(resid, [1.0 / 540.0, 4e-12])
-    inv_q0, tau = float(sol.x[0]), float(sol.x[1])
+    sol = least_squares(resid, [1000.0 / 540.0, 4.0])
+    inv_q0, tau = float(sol.x[0] / 1000.0), float(sol.x[1] * 1e-12)
     q_all = np.concatenate([q for _, q, _, _ in data])
     r2_joint = 1.0 - float(np.sum(sol.fun ** 2)) / float(np.sum((q_all - q_all.mean()) ** 2))
 
@@ -265,9 +272,20 @@ def validate_q():
     fig.savefig(HERE / "fig_validation_Q.png", dpi=160)
     plt.close(fig)
 
+    # The manuscript reports the loss WITHOUT a frequency factor, as
+    # 1/Q = 1/Q0 + Lambda x, because run_loss_scaling.py shows that the
+    # exponent of any such factor is 0.20 +/- 0.05 across platforms, not 1.
+    # The relaxation form is kept here only as the alternative it is.
+    def resid_lambda(u):
+        return np.concatenate([q - 1.0 / (1.0 / (1000.0 / u[0]) + u[1] * 1e-3 * x)
+                               for x, q, f_r, _ in data])
+    sol_l = least_squares(resid_lambda, [1000.0 / 523.0, 5.0])
+    q0_lambda, lam = 1000.0 / sol_l.x[0], float(sol_l.x[1] * 1e-3)
+
     return {"n_ensemble": int(xa.size), "Q_min": float(qa.min()), "Q_max": float(qa.max()),
             "pearson_r_ensemble": float(np.corrcoef(xa, qa)[0, 1]),
-            "Q0_shared": 1.0 / inv_q0, "tau_ps_per_pct": tau * 1e12,
+            "Q0_shared": q0_lambda, "Lambda_per_pct": lam,
+            "Q0_relaxation_form": 1.0 / inv_q0, "tau_ps_per_pct": tau * 1e12,
             "R2_joint": r2_joint, "subsets": per_subset}
 
 
@@ -336,24 +354,27 @@ if __name__ == "__main__":
           % (r["n_devices"], r["kappa_min"], r["kappa_max"]))
     print("  measured  : %.3f-%.3f %%  spread x%.0f"
           % (r["measured_min"], r["measured_max"], r["measured_spread"]))
-    for tag in ("deam", "squire"):
+    for tag in ("averaged", "coherent"):
         s = r[tag]
         print("  %-7s : v=%.0f%%  spread x%-4.0f  RMS factor %.2f  median dev %.0f%%"
               % (tag, s["v_global_pct"], s["spread"], s["rms_factor"],
                  s["median_abs_dev_pct"]))
     s = r["deam_fit_free"]
-    print("  fit-free: no fitted anisotropy, spread x%.0f up to kappa=%.1f, "
+    print("  no fitted anisotropy function: spread x%.0f up to kappa=%.1f, "
           "RMS factor %.2f" % (s["spread"], s["kappa_max"], s["rms_factor"]))
     s = r["published_model"]
     print("  [1] Fig10: published two-domain model, spread x%.0f, RMS factor %.2f, "
           "median dev %.0f%%" % (s["spread"], s["rms_factor"], s["median_abs_dev_pct"]))
     print("  curve ranges: DEAM %.3f-%.3f %%, single domain %.3f-%.3f %%"
-          % (*r["curve_range_deam"], *r["curve_range_squire"]))
+          % (*r["curve_range_averaged"], *r["curve_range_coherent"]))
     print("QUALITY FACTOR  (%d measured devices in the ensemble)" % q["n_ensemble"])
     print("  Q measured %.0f-%.0f, Pearson r = %.2f"
           % (q["Q_min"], q["Q_max"], q["pearson_r_ensemble"]))
-    print("  shared constants: Q0 = %.0f, tau = %.2f ps per %% of response"
-          % (q["Q0_shared"], q["tau_ps_per_pct"]))
+    print("  shared constants, as reported in the paper: Q0 = %.0f, Lambda = %.2e per %%"
+          % (q["Q0_shared"], q["Lambda_per_pct"]))
+    print("  (relaxation form, kept as the alternative: Q0 = %.0f, tau = %.2f ps per %%;"
+          % (q["Q0_relaxation_form"], q["tau_ps_per_pct"]))
+    print("   run_loss_scaling.py shows the frequency exponent is 0.20 +/- 0.05, not 1)")
     for s in q["subsets"]:
         print("  %-11s f_r=%3.0f MHz  N=%2d | Eq.(4) refit gNM=%.3f gM=%.3f "
               "(Table II of [1]: %.3f / %.3f), R2 %.2f -> %.2f with shared constants"

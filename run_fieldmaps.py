@@ -25,7 +25,7 @@ p = anisotropy_profile(st)
 z_nm = (st.z - st.z.min()) * 1e9        # nm from bottom of FeGaB
 zN = None if st.z_neutral is None else (st.z_neutral - st.z.min()) * 1e9
 
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.0))
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(5.4, 7.4))
 a1.plot(z_nm, st.sxx / 1e6, label=r"$\sigma_{xx}$", color="C0")
 a1.plot(z_nm, st.syy / 1e6, label=r"$\sigma_{yy}$", color="C3")
 a1.plot(z_nm, st.sxy / 1e6, label=r"$\sigma_{xy}$", color="C2")
@@ -70,7 +70,7 @@ for i, (sx, sy, sxy) in enumerate(sret):
     Ksig[i] = (e.max() - e.min()) / 1e3   # kJ/m^3
     phis[i] = np.rad2deg(_ALPHA[np.argmin(e)])
 
-fig, (b1, b2) = plt.subplots(1, 2, figsize=(11, 3.6))
+fig, (b1, b2) = plt.subplots(2, 1, figsize=(5.4, 6.8))
 sc1 = b1.tripcolor(cent[:, 0], cent[:, 1], phis, shading="gouraud",
                    cmap="twilight", vmin=0, vmax=180)
 b1.set_title(r"(a) Easy-axis angle $\varphi_\sigma$ (deg)")

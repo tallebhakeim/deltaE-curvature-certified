@@ -1,0 +1,16 @@
+{
+  "source": "T. Nan, Y. Hui, M. Rinaldi, N. X. Sun, Self-Biased 215MHz Magnetoelectric NEMS Resonator for Ultra-Sensitive DC Magnetic Field Detection, Sci. Rep. 3, 1985 (2013)",
+  "doi": "10.1038/srep01985",
+  "kind": "increment",
+  "note": "Q values quoted verbatim from the text: 'the Q started from 735 (0 Oe) then reached the minimum value of 250 at the transition magnetic field (15 Oe) and finally saturated to 1400 at high magnetic fields (> 60 Oe)'. The frequency swing is NOT stated in the text and exists only in Fig. 2(d), so two readings of that figure are carried: 0.74% (zero field to the dip) and 1.10% (saturation to the dip). Raster figure at about 220 dpi, so the reading is coarse; both values are propagated rather than one being chosen.",
+  "mode": "width-extensional contour",
+  "stack": "AlN 250 nm / (FeGaB/Al2O3)x10 250 nm / Pt 50 nm",
+  "independent_of_matyushov_2021": true,
+  "independence_note": "Different wafer, different fabrication run (2013), different magnetic stack: a FeGaB/Al2O3 multilayer rather than a single FeGaB layer. Same laboratory as [1] (Sun, Northeastern), different device generation.",
+  "increments": [
+    {"f_r_Hz": 2.15e8, "Q_working_point": 250, "Q_saturation": 1400, "response_pct": 0.74,
+     "reading": "zero field to the dip"},
+    {"f_r_Hz": 2.15e8, "Q_working_point": 250, "Q_saturation": 1400, "response_pct": 1.10,
+     "reading": "saturation to the dip"}
+  ]
+}

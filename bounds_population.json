@@ -1,0 +1,115 @@
+{
+ "box_nominal": {
+  "v": 0.0478,
+  "K0_kJ": 0.8,
+  "slope_kJ": 1.5999999999999999,
+  "phi_inf_deg": 60.0,
+  "lam_s": 7.5e-05,
+  "Ms": 1280000.0,
+  "t_fegab": 5e-07
+ },
+ "box_halfwidth": {
+  "v": 0.12,
+  "K0_kJ": 0.25,
+  "slope_kJ": 0.2,
+  "phi_inf_deg": 10.0,
+  "lam_s": 0.1,
+  "Ms": 0.05,
+  "t_fegab": 0.05
+ },
+ "monotonicity": {
+  "probes": 420,
+  "violations": 24,
+  "non_monotone_inputs": [
+   "phi_inf_deg"
+  ],
+  "handled_by": "dense scan on the easy-axis angle",
+  "refinement_gain_rel": 0.05751463386521314
+ },
+ "nominal_box": {
+  "coverage": 0.765625,
+  "median_band_factor": 3.0249837109854036,
+  "n_inside": 49,
+  "n_devices": 64
+ },
+ "width_scan": [
+  {
+   "width_scale": 1.0,
+   "coverage": 0.765625,
+   "median_band_factor": 3.0249837109854036
+  },
+  {
+   "width_scale": 1.5,
+   "coverage": 0.90625,
+   "median_band_factor": 5.2744758884103735
+  },
+  {
+   "width_scale": 2.0,
+   "coverage": 0.96875,
+   "median_band_factor": 9.33700368020117
+  },
+  {
+   "width_scale": 2.5,
+   "coverage": 0.984375,
+   "median_band_factor": 16.87500700438844
+  },
+  {
+   "width_scale": 3.0,
+   "coverage": 1.0,
+   "median_band_factor": 32.41061198401569
+  },
+  {
+   "width_scale": 4.0,
+   "coverage": 1.0,
+   "median_band_factor": 102.60742707189512
+  }
+ ],
+ "box_needed_for_95pct": {
+  "width_scale": 2.0,
+  "coverage": 0.96875,
+  "median_band_factor": 9.33700368020117
+ },
+ "measured_scatter_in_bins": [
+  {
+   "kappa_range": [
+    0.2197,
+    0.44305493841762605
+   ],
+   "n": 4,
+   "spread_factor": 1.6503656998738965
+  },
+  {
+   "kappa_range": [
+    0.44305493841762605,
+    0.8934805573793647
+   ],
+   "n": 10,
+   "spread_factor": 1.9321495175545282
+  },
+  {
+   "kappa_range": [
+    0.8934805573793647,
+    1.8018250947977275
+   ],
+   "n": 15,
+   "spread_factor": 10.294488188976377
+  },
+  {
+   "kappa_range": [
+    1.8018250947977275,
+    3.6336254274690045
+   ],
+   "n": 21,
+   "spread_factor": 6.921052631578948
+  },
+  {
+   "kappa_range": [
+    3.6336254274690045,
+    7.3277
+   ],
+   "n": 14,
+   "spread_factor": 13.308288148721921
+  }
+ ],
+ "worst_measured_spread_at_fixed_kappa": 13.308288148721921
+}

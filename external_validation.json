@@ -1,0 +1,89 @@
+{
+ "families": [
+  {
+   "name": "[1], designs 3, 4",
+   "n": 12,
+   "f_r_MHz": 246.0,
+   "meta": {
+    "self_test": true
+   },
+   "blind": {
+    "R2": 0.7045157193828956,
+    "median_abs_dev_pct": 26.42786794321519
+   },
+   "wrong_frequency_control": {
+    "246 MHz": 0.7045157193828956,
+    "138 MHz": 0.5578646599183893
+   },
+   "refitted_on_this_family": {
+    "Q0": 566.1571853243724,
+    "tau_ps": 4.513472158240426,
+    "tau_inside_our_interval": true,
+    "R2": 0.712080309489308
+   }
+  },
+  {
+   "name": "[1], designs 7, 8",
+   "n": 13,
+   "f_r_MHz": 138.0,
+   "meta": {
+    "self_test": true
+   },
+   "blind": {
+    "R2": 0.39400546206315645,
+    "median_abs_dev_pct": 32.62064393683829
+   },
+   "wrong_frequency_control": {
+    "246 MHz": 0.3123694018069658,
+    "138 MHz": 0.39400546206315645
+   },
+   "refitted_on_this_family": {
+    "Q0": 506.52116784891973,
+    "tau_ps": 3.810193082583021,
+    "tau_inside_our_interval": true,
+    "R2": 0.3960239841554605
+   }
+  }
+ ],
+ "increments": [
+  {
+   "f_r_MHz": 0.00745,
+   "response_pct": 0.68,
+   "measured_increment": 0.00034090909090909094,
+   "predicted_increment": 1.2955061023831919e-07,
+   "ratio_predicted_over_measured": 0.00038001512336573623,
+   "tau_implied_ps": 10710.100071683011,
+   "tau_inside_our_interval": false,
+   "source": "P. Durdaut et al., Phase Sensitivity and Phase Noise of Cantilever-Type Magnetoelastic Sensors Based on the Delta-E Effect, arXiv:2003.01085; published as J. Microelectromech. Syst. 29, 1347 (2020)",
+   "doi": "10.1109/jmems.2020.3014402",
+   "independent": false,
+   "reading": "agent reading of Fig. 2a and Fig. 3b, unverified"
+  },
+  {
+   "f_r_MHz": 215.0,
+   "response_pct": 0.74,
+   "measured_increment": 0.003285714285714286,
+   "predicted_increment": 0.004068594964255148,
+   "ratio_predicted_over_measured": 1.2382680325993929,
+   "tau_implied_ps": 3.286848963916309,
+   "tau_inside_our_interval": true,
+   "source": "T. Nan, Y. Hui, M. Rinaldi, N. X. Sun, Self-Biased 215MHz Magnetoelectric NEMS Resonator for Ultra-Sensitive DC Magnetic Field Detection, Sci. Rep. 3, 1985 (2013)",
+   "doi": "10.1038/srep01985",
+   "independent": true,
+   "reading": "zero field to the dip"
+  },
+  {
+   "f_r_MHz": 215.0,
+   "response_pct": 1.1,
+   "measured_increment": 0.003285714285714286,
+   "predicted_increment": 0.006047911433352247,
+   "ratio_predicted_over_measured": 1.8406686971072055,
+   "tau_implied_ps": 2.21115293936188,
+   "tau_inside_our_interval": true,
+   "source": "T. Nan, Y. Hui, M. Rinaldi, N. X. Sun, Self-Biased 215MHz Magnetoelectric NEMS Resonator for Ultra-Sensitive DC Magnetic Field Detection, Sci. Rep. 3, 1985 (2013)",
+   "doi": "10.1038/srep01985",
+   "independent": true,
+   "reading": "saturation to the dip"
+  }
+ ]
+}

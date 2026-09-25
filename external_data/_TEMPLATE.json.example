@@ -1,0 +1,13 @@
+{
+  "source": "Author, A. et al., Journal Name 12, 345678 (2026)",
+  "doi": "10.xxxx/yyyyyy",
+  "note": "Values read from Fig. 3(b) and Table 2. Q from the fitted Lorentzian, response as the total excursion of f_r over the field sweep. Digitised with digitize_paper_figures.py; residual of the axis calibration below 1e-3.",
+  "mode": "contour",
+  "stack": "FeCoSiB/AlScN, 200 nm magnetic",
+  "independent_of_matyushov_2021": true,
+  "devices": [
+    {"f_r_Hz": 5.2e7, "Q": 1150, "response_pct": 0.08},
+    {"f_r_Hz": 5.2e7, "Q": 980,  "response_pct": 0.17},
+    {"f_r_Hz": 5.2e7, "Q": 640,  "response_pct": 0.41}
+  ]
+}

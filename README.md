@@ -1,130 +1,161 @@
-# Certified, fit-free modeling of curvature and stress effects in contour-mode Delta-E magnetometers
+# Reproduction + innovation : courbure & contrainte dans les magnétomètres à effet ΔE
 
-Reproducibility package for the manuscript
+Reproduction Python autonome de :
 
-> H. Talleb, *Certified, fit-free modeling of curvature and stress effects in
-> contour-mode Delta-E effect magnetometers: an energy-averaged domain model and
-> loss-limited detectivity*, submitted to IEEE Sensors Journal.
+> A. D. Matyushov, B. Spetzler, ... N. X. Sun,
+> *Curvature and Stress Effects on the Performance of Contour-Mode Resonant
+> ΔE Effect Magnetometers*, Adv. Mater. Technol. **6**, 2100294 (2021).
 
-Every figure, every table and every number quoted in the paper is produced by a
-deterministic script in this repository. There is no random number generation
-and no manual data entry, so a single run reproduces the paper exactly.
+Résultat central du papier : dans des résonateurs NEMS FeGaB/AlN/Pt (~130-250 MHz),
+la **courbure résiduelle κ = 1/R** de la plaque (manifestation de la contrainte de
+dépôt) contrôle la réponse fréquentielle Δf_r/f_r,min sur ~2 ordres de grandeur,
+et anti-corrèle avec le facteur de qualité Q (mécanisme de perte magnétique).
 
-## Measured reference data
+## Chaîne de modèle (fidèle au papier)
 
-The measurements the model is scored against are those published in
+1. `mechanics.py` — plaque laminée (CLT/ABD) avec contrainte initiale par couche ;
+   relaxation libre → courbure κ et champ de contrainte σ(z) à travers l'épaisseur,
+   avec **axe neutre** (position fixée par les rapports d'épaisseur, invariante vs κ,
+   comme observé). Remplace le FEM COMSOL du papier.
+2. `magnetoelastic.py` — énergie magnéto-élastique (éq. 5-6) → anisotropie induite
+   K_σ(z), angle φ_σ(z) ; superposition de l'anisotropie de champ K_u ; moyennes
+   volumiques → K_eff(κ), φ_eff(κ). **Reproduit Fig 9d.**
+3. `deltaE.py` — modulus E(H) via ramollissement magnéto-élastique
+   1/E = 1/E0 + dλ/dσ, puis f_r(H) et Δf_r/f_r,min. **Reproduit Fig 3a et Fig 10.**
 
-> A. D. Matyushov, B. Spetzler, M. Zaeimbashi, J. Zhou, Z. Qian, E. V. Golubeva,
-> C. Tu, Y. Guo, B. F. Chen, D. Wang, A. Will-Cole, H. Chen, M. Rinaldi,
-> J. McCord, F. Faupel and N. X. Sun, *Curvature and stress effects on the
-> performance of contour-mode resonant Delta-E effect magnetometers*,
-> Adv. Mater. Technol. **6**, 2100294 (2021). doi:10.1002/admt.202100294
+## Fidélité (constantes verbatim du papier)
 
-No new device was fabricated for the present work. Because the published figures
-are vector graphics, the individual device values are recovered exactly rather
-than estimated from a raster image: `digitize_paper_figures.py` reads the
-centroid of every marker from the graphics content stream of the article and
-maps it to data coordinates through the axis tick marks. The affine calibration
-residual on the ticks is below 1e-3 in data units for every panel.
+| Grandeur | Papier | Reproduction |
+|---|---|---|
+| κ (plage dispositifs) | ~0 – 7 mm⁻¹ | 0 – 8 mm⁻¹ |
+| K_eff(κ) | linéaire, ~12 kJ/m³ à κ=7 | linéaire (fit), forme reproduite par FEM |
+| φ_eff | 90° → plateau ~60° | 90° → plateau 60° (fit) ; FEM plateaue aussi |
+| Δf_r/f_r,min plat | ~2.5 % | 2.5 % (calibré) |
+| Plage dynamique Δf_r | ~×100 (2 ordres) | **×33 (moyenné)** ; **×33 aussi en rotation cohérente** (voir avertissement) |
+| Q vs réponse | anti-corrélé (Fig 6) | anti-corrélé, ×7 |
 
-The recovered values are shipped here as plain JSON (`measured_*.json`,
-`model_fig10.json`) so that the rest of the package runs without the source PDF.
-They remain the intellectual property of the authors above and are redistributed
-only as the coordinates read from their published figures, with attribution.
+Notes :
+- **φ_eff** : la moyenne circulaire des angles par tranche est dégénérée pour une
+  distribution bimodale 0°/90° ; la bonne méthode (papier p.12) est d'extraire l'axe
+  facile du paysage d'énergie moyenné en z, qui **plateaue**. Le papier alimente
+  d'ailleurs le modèle domaine avec des fonctions **fittées** φ_eff(κ) (loi puissance)
+  et K_eff(κ) (linéaire), reproduites dans `paper_fits.py`. Notre FEM en donne la forme
+  (départ 90°, plateau), à magnitude réduite/miroir car une plaque libre sur-relaxe la
+  contrainte biaxiale (seul le désaccord inter-couches subsiste).
+- ⚠ **AVERTISSEMENT (19/09/2026), défaut numérique corrigé** : l'affirmation « le
+  mono-domaine sature à ×2 (puis ×1,5), donc le modèle moyenné est nécessaire » était
+  un **artefact de discrétisation**, pas un résultat. `squire_E` et `deam_E` évaluent
+  dλ/dσ par différence finie sur une sonde dσ = 0,2 MPa, après avoir cherché l'angle
+  d'équilibre sur la grille fixe de 721 points de `deltaE.py`. Or la sonde déplace
+  l'angle d'équilibre de beaucoup moins que le pas de grille (8,7e-3 rad), donc la
+  dérivée du mono-domaine est quantifiée, et effondrée. En raffinant la grille elle
+  remonte à ×22 (n = 21601) et continue de monter. `deltaE_analytic.py` donne les deux
+  compliances **en forme fermée** (différentiation implicite de g'(θ) = 0 pour la
+  rotation cohérente, identité fluctuation-réponse dλ/dσ = A_s (3λ_s/2)² Var(cos²θ)
+  pour la population). Résultat vérifié et indépendant de toute grille : rotation
+  cohérente ×28,9 / RMS ×1,818 et moyenné ×30,3 / RMS ×1,851, avec le **même** v
+  global ≈ 4,8 %. Les deux modèles partagent la limite raide (A_s → ∞), ce que la
+  forme fermée démontre. **Les données ne discriminent donc pas les deux modèles** et
+  le résultat robuste est ailleurs : une seule constante d'échelle à l'échelle du
+  wafer suffit, là où [1] en ajuste une par dispositif.
 
-**Verification of the digitization.** Refitting Eq. (4) of the reference work to
-the recovered fixed-frequency subsets returns non-magnetic damping constants of
-0.027 and 0.017 (units of 1e8 Hz), the values listed in its Table 2. This is run
-automatically by `run_validation.py`.
+## Innovations ajoutées (au-delà du papier)
 
-| file | content | N |
-| --- | --- | --- |
-| `measured_fig3a.json` | response vs curvature, Fig. 3a | 64 devices |
-| `measured_fig6a.json` | quality factor vs response, Fig. 6a | 51 devices |
-| `measured_fig6c.json` | subset at 246 MHz, Fig. 6c | 12 devices |
-| `measured_fig6d.json` | subset at 138 MHz, Fig. 6d | 13 devices |
-| `model_fig10.json` | the two-domain model curve of Fig. 10 | 47 samples |
+1. **Une seule constante globale** à la place du paramètre d'ajustement *par
+   dispositif* v = 8 % de [1] : v ≈ 4,8 % (IC 95 % bootstrap [4,2 ; 5,4] %) pour les
+   64 dispositifs. Vaut aussi bien pour la rotation cohérente que pour le modèle
+   énergie-moyenné (`deltaE_analytic.py`), qui ne sont pas discriminés par ces
+   mesures. Le paramètre de largeur de population A_s = c/K_eff n'est **pas**
+   identifiable (4 % de variation du score pour c de 2 à 1000).
+2. **ΔE intégré en épaisseur** (`deltaE.py::frequency_response_profile`) : la
+   compensation entre tranches de part et d'autre de l'axe neutre reproduit
+   *physiquement* la forte chute de réponse — origine microscopique du petit v du papier.
+3. **Q(κ) par perte physique** (`q_factor.py`) : le facteur de qualité découle du même
+   ramollissement ΔE (perte magnéto-élastique 1/Q_mag ∝ α_m·E0·dλ/dσ), transformant
+   l'éq. 4 phénoménologique en relation prédictive. **Reproduit Fig 6.**
+   Corollaire nouveau (`run_extensions.py::fig_detectivity`) : en couplant Q dans la
+   **détectivité** (LOD ∝ (f_r/Q)/S), l'écart ×46 de la réponse brute se réduit à **×6,5**
+   en LOD, car le faible Q des dispositifs plats compense leur sensibilité élevée. La
+   dispersion « ×100 » que le papier voit comme un problème de rendement est donc bien
+   moins sévère sur la détectivité réelle — conclusion absente du papier.
+4. **Certification** (`extensions.py`) : bornes garanties (enclosure exacte, car la
+   mécanique est linéaire) sur κ puis sur Δf_r à partir d'une *boîte d'incertitude de
+   contrainte* → bande de performance certifiée (style Prager-Synge).
+5. **Design inverse** (`extensions.py`) : couche de compensation de contrainte
+   (solution close, linéaire) qui annule κ → réponse ΔE maximale.
+6. **FE 2D rétention par ancrage** (`fe2d.py`) : relaxation plane-stress Q4 de
+   l'empreinte de la plaque avec les 2 anchors encastrés. Montre que l'ancrage
+   retient ~64 % de l'anisotropie résiduelle au centre (vs ~13 % plaque libre CLT)
+   → Kσ ~2 kJ/m³ dans la gamme du papier, et reproduit la non-uniformité MOKE
+   centre/bords. Ferme l'écart de magnitude de la Fig 1.
 
-## Install and run
+## Manuscrit + cover letter
+
+- `build_manuscript.js` → `Article_DeltaE_curvature_certified_v1.docx` (IOP/SMS,
+  anglais, 11 figures dont schéma d'illustration + cartographies de champs,
+  Table 1 de constantes, sans em-dash).
+- Figures d'illustration/champs : `run_illustration.py` (schéma capteur →
+  fig_schematic), `run_fieldmaps.py` (profils σ(z)/Kσ(z)/φσ(z) → fig_fields_z ;
+  cartographies 2D φσ/Kσ → fig_fields_xy, repro Fig 9a,b du papier).
+- `build_cover_letter.js` → `Cover_letter_DeltaE_curvature_v1.docx`.
+Régénérer : `node build_manuscript.js && node build_cover_letter.js`.
+
+## Exécution
 
 ```bash
-pip install -r requirements.txt
-./run                        # everything, output collected in results/
+python3 run_repro.py        # Fig 9d, Fig 10, Fig 3a
+python3 run_extensions.py    # Fig 6 (Q), certification, design inverse
 ```
 
-`./run` is also the Code Ocean entry point. It takes about a minute on one core.
-The individual drivers can be called separately:
+Figures produites : `fig_9d_aniso.png`, `fig_10_frH.png`, `fig_3a_response.png`,
+`fig_6_Q.png`, `fig_cert_band.png`, `fig_detectivity.png`, `fig_design.png`.
 
-```bash
-python run_validation.py     # Figs. 4, 6, 7 and Table I, plus validation.json
-python run_repro.py          # Figs. 3 and 5
-python run_extensions.py     # Figs. 8 and 9, certified bounds and inverse design
-python run_fe2d.py           # Fig. 10, 2D relaxation with clamped anchors
-python run_fieldmaps.py      # Figs. 2 and 11, through-thickness and xy fields
-python run_graphical_abstract.py   # graphical abstract, numbers read from validation.json
-```
+## Fichiers
 
-### Figure map
+- `materials.py` — constantes FeGaB/AlN/Pt (verbatim papier)
+- `mechanics.py` — plaque laminée, κ et σ(z)
+- `magnetoelastic.py` — K_σ, φ_σ, K_eff(κ), φ_eff(κ)
+- `deltaE.py` — Squire, DEAM, intégration en épaisseur, f_r(H)
+- `paper_fits.py` — fonctions fittées K_eff(κ) (linéaire) et φ_eff(κ) (puissance, plateau 60°), comme le papier
+- `q_factor.py` — Q(κ) par perte physique
+- `extensions.py` — certification + design inverse
+- `run_repro.py`, `run_extensions.py` — pilotes / figures (dont détectivité)
 
-| manuscript | file |
-| --- | --- |
-| Fig. 2 | `fig_fields_z.png` |
-| Fig. 3 | `fig_9d_aniso.png` |
-| Fig. 4 | `fig_validation_response.png` |
-| Fig. 5 | `fig_10_frH.png` |
-| Fig. 6 | `fig_validation_Q.png` |
-| Fig. 7 | `fig_validation_detectivity.png` |
-| Fig. 8 | `fig_cert_band.png` |
-| Fig. 9 | `fig_design.png` |
-| Fig. 10 | `fig_fe2d.png` |
-| Fig. 11 | `fig_fields_xy.png` |
-| Table I | printed by `run_validation.py`, stored in `validation.json` |
+## Réponse aux relecteurs IEEE Sensors (19/09/2026)
 
-`run_repro.py` and `run_extensions.py` also emit `fig_3a_response.png`,
-`fig_6_Q.png` and `fig_detectivity.png`. These are the earlier model-only
-versions of Figs. 4, 6 and 7, kept because they show the model without the
-measured overlay; the manuscript uses the `fig_validation_*` versions, which
-are scored against the measurements.
+Voir `REVISION_NOTES.md` pour les chiffres et les deux défauts numériques corrigés.
 
-To regenerate the JSON data files from the source article instead of using the
-shipped copies, place the published PDF next to the scripts and run
+| Script | Objet | Sorties |
+|---|---|---|
+| `deltaE_analytic.py` | compliances magnéto-élastiques en forme fermée, sans grille | (bibliothèque) |
+| `crossval.py` | modèles, ajustements continus, découpages de population | (bibliothèque) |
+| `run_crossvalidation.py` | validation hors échantillon, transfert entre familles | `crossvalidation.json`, `fig_crossvalidation.png` |
+| `run_identifiability.py` | identifiabilité pratique des constantes globales | `identifiability.json`, `fig_identifiability.png` |
+| `run_bounds_population.py` | enveloppe garantie et couverture de la population | `bounds_population.json`, `fig_bounds_population.png` |
 
-```bash
-python digitize_paper_figures.py matyushov2021.pdf
-```
+`run_validation.py` a été porté sur les modèles analytiques et son ajustement des
+constantes de perte reparamétré ; `run_graphical_abstract.py` suit automatiquement,
+puisqu'il lit `validation.json`.
 
-The PDF itself is not redistributed here.
+Ordre d'exécution : `run_validation.py`, `run_crossvalidation.py`,
+`run_identifiability.py`, `run_bounds_population.py`, `run_graphical_abstract.py`,
+puis `node build_manuscript.js`, `node build_supplementary.js`,
+`node build_cover_letter.js`.
 
-## Modules
+### Brancher un second jeu de mesures
 
-| module | role |
-| --- | --- |
-| `materials.py` | material constants of the FeGaB / AlN / Pt stack, taken from the reference work |
-| `mechanics.py` | classical lamination theory: initial stress to curvature and through-thickness stress |
-| `magnetoelastic.py` | stress-induced anisotropy `(K_eff, phi_eff)`, per slice and volume-effective |
-| `deltaE.py` | Delta-E effect: coherent rotation, energy-averaged domain model (DEAM), response |
-| `paper_fits.py` | the fitted `K_eff(kappa)` and `phi_eff(kappa)` of the reference work, used only for the comparison branch |
-| `q_factor.py` | quality factor from the magnetoelastic softening compliance |
-| `extensions.py` | certified two-sided bounds and closed-form stress compensation |
-| `fe2d.py` | 2D plane-stress relaxation with clamped anchors |
+`run_external_validation.py` teste la loi de perte sur une famille de dispositifs
+extérieure, **sans rien réajuster** : Q0 = 523 et tau = 4,07 ps sont imposés et on
+regarde ce que ça donne. Déposer un fichier JSON dans `external_data/` au format de
+`external_data/_TEMPLATE.json.example`, puis lancer le script. Sans argument il fait
+son auto-test sur les deux familles de [1] et doit redonner R² = +0,70 et +0,39.
 
-## Expected output of `run_validation.py`
+Trois sorties par famille : la prédiction à l'aveugle, un contrôle où la même loi est
+forcée aux fréquences de nos propres familles (ce que ferait une loi sans f_r
+explicite), et le refit local pour voir si tau tombe dans notre intervalle à 95 %,
+2,0 à 8,0 ps.
 
-```
-RESPONSE  (64 measured devices, kappa 0.22-7.33 1/mm)
-  measured  : 0.013-1.309 %  spread x101
-  deam    : v=5%  spread x34    RMS factor 1.85  median dev 41%
-  squire  : v=2%  spread x2     RMS factor 3.56  median dev 72%
-  fit-free: no fitted anisotropy, spread x20 up to kappa=5.8, RMS factor 1.92
-  [1] Fig10: published two-domain model, spread x45, RMS factor 2.11, median dev 36%
-QUALITY FACTOR  (51 measured devices in the ensemble)
-  shared constants: Q0 = 540, tau = 4.00 ps per % of response
-DETECTIVITY  (25 devices with known f_r)
-  pooled: response x57 -> loss-limited detectivity x23 (compression x2.5)
-```
-
-## Contact
-
-H. Talleb, Sorbonne Universite, Universite Paris-Saclay, CNRS, CentraleSupelec,
-Laboratoire de Genie Electrique et Electronique de Paris (GeePs),
-hakeim.talleb@sorbonne-universite.fr
+⚠ Le contrôle en fréquence est FAIBLE entre nos deux familles, 246 et 138 MHz ne
+différant que d'un facteur 1,8 (0,70 contre 0,56 quand on se trompe de fréquence).
+C'est précisément pourquoi une troisième famille, à une fréquence nettement
+différente, vaudrait beaucoup plus que dix dispositifs de plus au même endroit.

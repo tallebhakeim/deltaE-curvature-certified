@@ -11,8 +11,8 @@ r = relax_plate(Lx=200e-6, Ly=70e-6, nx=48, ny=18,
 c = r["cent"] * 1e6                      # um
 d = r["dsig"] / 1e6                      # MPa retained sxx - syy
 
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 3.8),
-                             gridspec_kw={"width_ratios": [2.3, 1]})
+fig, (a1, a2) = plt.subplots(2, 1, figsize=(5.4, 7.2),
+                             gridspec_kw={"height_ratios": [2.0, 1]})
 
 # left: spatial map of retained anisotropy
 sc = a1.tripcolor(c[:, 0], c[:, 1], d, shading="gouraud", cmap="RdBu_r",
