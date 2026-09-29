@@ -353,14 +353,17 @@ Nan dit d'ailleurs lui-même de ses propres pertes (« magnetic loss associated 
 magnetic domain wall activities »). La loi est donc une **limite haute fréquence**, pas
 une loi universelle, et le croisement entre les deux régimes est une prédiction à tester.
 
-### 6.6 Correction d'une prémisse des deux relecteurs
+### 6.6 Nombre de wafers : la prémisse de R2 était JUSTE (corrigé le 29/09/2026)
 
-R2 écrit « relying exclusively on digitizing published plots from **a single wafer** in
-[1] ». C'est faux, et vérifié à la source (PMC9090164) : « Each batch of sensors used in
-Investigation 1 and Investigation 2 was fabricated on a **separate** Si wafer », et le
-Tableau 1 donne huit conceptions à 224,4 / 224,4 / 245,8 / 245,6 / 172,4 / 171,9 /
-136,8 / 137,1 MHz, soit **deux wafers et quatre fréquences distinctes**. À dire dans la
-lettre, courtoisement, car cela retire une partie du reproche d'origine unique.
+R2 écrit « relying exclusively on digitizing published plots from a single wafer in [1] ».
+Une première version de cette note le déclarait faux en s'appuyant sur la phrase de [1]
+« Each batch of sensors used in Investigation 1 and Investigation 2 was fabricated on a
+separate Si wafer ». C'était une erreur de lecture : il y a bien deux wafers dans [1],
+mais la légende de la Fig. 3a de [1] précise « from a single 4” Si wafer in
+Investigation 1 », et toutes nos données (64 réponses de la Fig. 3a, 51 facteurs Q de la
+Fig. 6a et les sous-ensembles des Fig. 6c,d) viennent de l'Investigation 1. Notre
+population est donc bien issue d'un seul wafer, comme le dit R2 et comme le dit le §II-E
+du manuscrit. Les données extérieures au wafer sont celles de [33] et [34] (§7).
 
 ### 6.7 Sources retenues pour la suite, non encore exploitées
 

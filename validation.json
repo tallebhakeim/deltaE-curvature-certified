@@ -64,7 +64,8 @@
     "gamma_NM_table2": 0.027,
     "gamma_M_table2": 0.15,
     "R2_paper_form": 0.7120803095593512,
-    "R2_shared_constants": 0.7045048044998516
+    "R2_shared_constants": 0.6711383566786011,
+    "R2_relaxation_form": 0.7045048044998516
    },
    {
     "subset": "designs 7, 8",
@@ -75,7 +76,8 @@
     "gamma_NM_table2": 0.017,
     "gamma_M_table2": 0.041,
     "R2_paper_form": 0.39602398425175767,
-    "R2_shared_constants": 0.3940124193427783
+    "R2_shared_constants": 0.3694224367803861,
+    "R2_relaxation_form": 0.3940124193427783
    }
   ]
  },
@@ -88,9 +90,9 @@
     "response_spread": 27.07474452554744,
     "Q_spread": 28.874706498682716,
     "detectivity_spread_measured": 13.010379651316851,
-    "detectivity_spread_model": 7.437616548821294,
+    "detectivity_spread_model": 8.819070675325303,
     "compression_measured": 2.0810111042998702,
-    "compression_model": 3.6402447407480585
+    "compression_model": 3.070022400580065
    },
    {
     "subset": "designs 7, 8",
@@ -99,9 +101,9 @@
     "response_spread": 56.72615092548647,
     "Q_spread": 6.220369546370309,
     "detectivity_spread_measured": 22.535998489718047,
-    "detectivity_spread_model": 18.384192940222988,
+    "detectivity_spread_model": 14.899218366751269,
     "compression_measured": 2.517135016288164,
-    "compression_model": 3.0855937549140204
+    "compression_model": 3.8073239500989637
    }
   ],
   "n_pooled": 25,

@@ -238,20 +238,34 @@ def validate_q():
     q_all = np.concatenate([q for _, q, _, _ in data])
     r2_joint = 1.0 - float(np.sum(sol.fun ** 2)) / float(np.sum((q_all - q_all.mean()) ** 2))
 
+    # The manuscript reports the loss WITHOUT a frequency factor, as
+    # 1/Q = 1/Q0 + Lambda x, because run_loss_scaling.py shows that the
+    # exponent of any such factor is 0.20 +/- 0.05 across platforms, not 1.
+    # R2, Fig. S1 and the detectivity prediction therefore use that form; the
+    # relaxation form above is kept in validation.json only as the alternative.
+    def resid_lambda(u):
+        return np.concatenate([q - 1.0 / (1.0 / (1000.0 / u[0]) + u[1] * 1e-3 * x)
+                               for x, q, f_r, _ in data])
+    sol_l = least_squares(resid_lambda, [1000.0 / 523.0, 5.0])
+    q0_lambda, lam = 1000.0 / sol_l.x[0], float(sol_l.x[1] * 1e-3)
+
     for entry, (x, q, f_r, _) in zip(per_subset, data):
-        pred = 1.0 / (inv_q0 + 2 * np.pi * f_r * tau * x)
+        pred = 1.0 / (1.0 / q0_lambda + lam * x)
         entry["R2_shared_constants"] = float(
             1.0 - np.sum((q - pred) ** 2) / np.sum((q - q.mean()) ** 2))
+        pred_tau = 1.0 / (inv_q0 + 2 * np.pi * f_r * tau * x)
+        entry["R2_relaxation_form"] = float(
+            1.0 - np.sum((q - pred_tau) ** 2) / np.sum((q - q.mean()) ** 2))
 
     xa, qa, _ = load_measured("measured_fig6a.json")
+    xx = np.linspace(1e-3, 1.25, 200)
+    q_law = 1.0 / (1.0 / q0_lambda + lam * xx)
     fig, axes = plt.subplots(2, 1, figsize=(5.2, 7.4))
     ax = axes[0]
     ax.plot(xa, qa, "o", ms=4.5, mfc="none", mec="0.55", mew=0.9,
             label=f"measured ensemble, {xa.size} devices [1]")
-    xx = np.linspace(1e-3, 1.25, 200)
-    for (x, q, f_r, tag), col in zip(data, ("C2", "C0")):
-        ax.plot(xx, 1.0 / (inv_q0 + 2 * np.pi * f_r * tau * xx), "-", color=col,
-                lw=2.0, label=r"model, $f_r=%.0f$ MHz" % (f_r / 1e6))
+    ax.plot(xx, q_law, "-", color="k", lw=2.0,
+            label="model, shared by both frequencies")
     ax.set_xlabel(r"$\Delta f_r/f_{r,\min}$ (%)")
     ax.set_ylabel(r"quality factor $Q$")
     ax.set_xlim(0, 1.25); ax.set_ylim(0, 780)
@@ -262,25 +276,15 @@ def validate_q():
     for (x, q, f_r, tag), col, mk in zip(data, ("C2", "C0"), ("s", "^")):
         ax.plot(x, q, mk, ms=5, mfc="none", mec=col, mew=1.2,
                 label=f"{tag}, {f_r/1e6:.0f} MHz")
-        ax.plot(xx, 1.0 / (inv_q0 + 2 * np.pi * f_r * tau * xx), "-", color=col, lw=2.0)
+    ax.plot(xx, q_law, "-", color="k", lw=2.0, label="model, two shared constants")
     ax.set_xlabel(r"$\Delta f_r/f_{r,\min}$ (%)")
     ax.set_xlim(0, 1.25); ax.set_ylim(0, 780)
     ax.grid(True, alpha=0.3); ax.legend(fontsize=7.5)
-    ax.set_title(r"(b) fixed-$f_r$ subsets, $Q_0=%.0f$, $\tau=%.1f$ ps/%%"
-                 % (1.0 / inv_q0, tau * 1e12), fontsize=9, loc="left")
+    ax.set_title(r"(b) fixed-$f_r$ subsets, $Q_0=%.0f$, $\Lambda=%.1f$ per mille per %%"
+                 % (q0_lambda, lam * 1e3), fontsize=9, loc="left")
     fig.tight_layout()
     fig.savefig(HERE / "fig_validation_Q.png", dpi=160)
     plt.close(fig)
-
-    # The manuscript reports the loss WITHOUT a frequency factor, as
-    # 1/Q = 1/Q0 + Lambda x, because run_loss_scaling.py shows that the
-    # exponent of any such factor is 0.20 +/- 0.05 across platforms, not 1.
-    # The relaxation form is kept here only as the alternative it is.
-    def resid_lambda(u):
-        return np.concatenate([q - 1.0 / (1.0 / (1000.0 / u[0]) + u[1] * 1e-3 * x)
-                               for x, q, f_r, _ in data])
-    sol_l = least_squares(resid_lambda, [1000.0 / 523.0, 5.0])
-    q0_lambda, lam = 1000.0 / sol_l.x[0], float(sol_l.x[1] * 1e-3)
 
     return {"n_ensemble": int(xa.size), "Q_min": float(qa.min()), "Q_max": float(qa.max()),
             "pearson_r_ensemble": float(np.corrcoef(xa, qa)[0, 1]),
@@ -290,7 +294,7 @@ def validate_q():
 
 
 # --------------------------------------------------------------------------
-def validate_detectivity(q0, tau):
+def validate_detectivity(q0, lam):
     """Loss-limited detectivity, computed device by device from the MEASURED
     response and quality factor.
 
@@ -310,7 +314,7 @@ def validate_detectivity(q0, tau):
         pooled_x.append(x); pooled_d.append((f_r / q) / x)
 
         # what the loss model predicts over the same response range
-        q_mod = 1.0 / (1.0 / q0 + 2 * np.pi * f_r * tau * x)
+        q_mod = 1.0 / (1.0 / q0 + lam * x)
         d_mod = (f_r / q_mod) / x
         per.append({"subset": tag, "f_r_MHz": f_r / 1e6, "n": int(x.size),
                     "response_spread": float(x.max() / x.min()),
@@ -346,7 +350,7 @@ def validate_detectivity(q0, tau):
 if __name__ == "__main__":
     r = validate_response()
     q = validate_q()
-    d = validate_detectivity(q["Q0_shared"], q["tau_ps_per_pct"] * 1e-12)
+    d = validate_detectivity(q["Q0_shared"], q["Lambda_per_pct"])
     out = {"response": r, "quality_factor": q, "detectivity": d}
     (HERE / "validation.json").write_text(json.dumps(out, indent=1))
 

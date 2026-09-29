@@ -8,7 +8,7 @@ Three questions, in the order a reviewer asks them:
      active fraction at each c, and report how much the fit actually changes.
 
   2. Are the two loss constants separately determined, or do they trade off?
-     Linearised covariance at the optimum plus a profile of tau with Q0
+     Linearised covariance at the optimum plus a profile of Lambda with Q0
      refitted, on top of the leave-one-out spread of run_crossvalidation.py.
 
   3. Does the assumed baseline residual stress (45, 75, 5) MPa trade off against
@@ -94,16 +94,18 @@ def _sets():
 
 
 def _resid(u, sets):
-    q0, tau = 1000.0 / u[0], u[1] * 1e-12
-    return np.concatenate([q - 1.0 / (1.0 / q0 + 2 * np.pi * f * tau * x)
-                           for x, q, f in sets])
+    # Loss law of the manuscript, 1/Q = 1/Q0 + Lambda x, with no frequency
+    # factor (run_loss_scaling.py: exponent 0.20 +/- 0.05).  Both unknowns are
+    # carried at order unity: u = (1000/Q0, Lambda in per mille per %).
+    q0, lam = 1000.0 / u[0], u[1] * 1e-3
+    return np.concatenate([q - 1.0 / (1.0 / q0 + lam * x) for x, q, f in sets])
 
 
 def loss_identifiability():
     sets = _sets()
-    sol = least_squares(_resid, [1000.0 / 540.0, 4.0], args=(sets,))
+    sol = least_squares(_resid, [1000.0 / 540.0, 5.0], args=(sets,))
     u = sol.x
-    q0, tau_ps = 1000.0 / u[0], float(u[1])
+    q0, lam_pm = 1000.0 / u[0], float(u[1])
     n = sum(x.size for x, _, _ in sets)
     dof = n - 2
     s2 = 2.0 * sol.cost / dof
@@ -114,29 +116,29 @@ def loss_identifiability():
     # propagate the standard error of u0 = 1000/Q0 to Q0
     sd_q0 = q0 * sd[0] / u[0]
 
-    # profile of tau with Q0 refitted at each tau
+    # profile of Lambda with Q0 refitted at each Lambda
     prof = []
-    for tau_fix in np.linspace(0.5, 24.0, 48):
-        r = least_squares(lambda a: _resid([a[0], tau_fix], sets), [u[0]])
-        prof.append({"tau_ps": float(tau_fix), "Q0": 1000.0 / r.x[0],
+    for lam_fix in np.linspace(0.5, 25.0, 50):
+        r = least_squares(lambda a: _resid([a[0], lam_fix], sets), [u[0]])
+        prof.append({"Lambda_pm": float(lam_fix), "Q0": 1000.0 / r.x[0],
                      "rms_Q": float(np.sqrt(2 * r.cost / n))})
     rms0 = float(np.sqrt(2 * sol.cost / n))
     # 95% interval from the F-threshold on the sum of squares (2 parameters)
     thr = rms0 * np.sqrt(1.0 + 2.0 * 3.0 / dof)
-    inside = [p["tau_ps"] for p in prof if p["rms_Q"] <= thr]
+    inside = [p["Lambda_pm"] for p in prof if p["rms_Q"] <= thr]
 
     return {
         "n_devices": int(n),
         "Q0": q0, "Q0_stderr": float(sd_q0),
-        "tau_ps_per_pct": tau_ps, "tau_stderr_ps": float(sd[1]),
-        "correlation_Q0_tau": float(-corr),   # sign in terms of Q0, not 1/Q0
+        "Lambda_permille_per_pct": lam_pm, "Lambda_stderr_permille": float(sd[1]),
+        "correlation_Q0_Lambda": float(-corr),   # sign in terms of Q0, not 1/Q0
         "condition_number_jacobian": float(np.linalg.cond(J)),
         "rms_Q_at_optimum": rms0,
-        "tau_profile": prof,
-        "tau_interval_95_ps": [float(min(inside)), float(max(inside))] if inside else None,
+        "Lambda_profile": prof,
+        "Lambda_interval_95_permille": [float(min(inside)), float(max(inside))] if inside else None,
         "previous_submission_values": {"Q0": 540.0, "tau_ps_per_pct": 4.0,
                                        "status": "optimiser start point, not a fit"},
-    }, (prof, rms0, thr, tau_ps)
+    }, (prof, rms0, thr, lam_pm)
 
 
 # --------------------------------------- 3. baseline residual stress --------
@@ -196,7 +198,7 @@ def stress_identifiability():
 # ---------------------------------------------------------------- figure ----
 def figure(width_aux, loss_aux, stress):
     c_grid, rms_c, v_c = width_aux
-    prof, rms0, thr, tau_hat = loss_aux
+    prof, rms0, thr, lam_hat = loss_aux
     fig, axes = plt.subplots(3, 1, figsize=(5.4, 10.4))
 
     ax = axes[0]
@@ -217,16 +219,15 @@ def figure(width_aux, loss_aux, stress):
                  fontsize=9, loc="left")
 
     ax = axes[1]
-    t = np.array([p["tau_ps"] for p in prof]); r = np.array([p["rms_Q"] for p in prof])
+    t = np.array([p["Lambda_pm"] for p in prof]); r = np.array([p["rms_Q"] for p in prof])
     ax.plot(t, r, "-", color="C0", lw=2)
     ax.axhline(thr, ls="--", color="C3", lw=1.4, label="95% threshold")
-    ax.axvline(tau_hat, ls=":", color="0.4", lw=1.2,
-               label=r"$\hat\tau=%.2f$ ps/%%" % tau_hat)
-    ax.axvline(4.0, ls="-.", color="C2", lw=1.2, label="4.0 ps/% as submitted")
-    ax.set_xlabel(r"relaxation time $\tau$ (ps per % of response)")
+    ax.axvline(lam_hat, ls=":", color="0.4", lw=1.2,
+               label=r"$\hat\Lambda=%.2f$ per mille per %%" % lam_hat)
+    ax.set_xlabel(r"magnetoelastic loss $\Lambda$ (per mille per % of softening)")
     ax.set_ylabel(r"RMS residual in $Q$")
     ax.grid(True, alpha=0.3); ax.legend(fontsize=7.5)
-    ax.set_title(r"(b) profile of $\tau$ with $Q_0$ refitted", fontsize=9, loc="left")
+    ax.set_title(r"(b) profile of $\Lambda$ with $Q_0$ refitted", fontsize=9, loc="left")
 
     ax = axes[2]
     rows = stress["grid"]
@@ -269,12 +270,13 @@ if __name__ == "__main__":
 
     print("2. LOSS CONSTANTS  (%d devices)" % loss["n_devices"])
     print("   Q0  = %.0f +/- %.0f" % (loss["Q0"], loss["Q0_stderr"]))
-    print("   tau = %.2f +/- %.2f ps per %% of response" % (loss["tau_ps_per_pct"], loss["tau_stderr_ps"]))
-    print("   correlation(Q0, tau) = %+.2f, Jacobian condition number %.1f"
-          % (loss["correlation_Q0_tau"], loss["condition_number_jacobian"]))
-    if loss["tau_interval_95_ps"]:
-        print("   95%% interval on tau from the profile: %.2f to %.2f ps/%%"
-              % tuple(loss["tau_interval_95_ps"]))
+    print("   Lambda = %.2f +/- %.2f per mille per %% of softening"
+          % (loss["Lambda_permille_per_pct"], loss["Lambda_stderr_permille"]))
+    print("   correlation(Q0, Lambda) = %+.2f, Jacobian condition number %.1f"
+          % (loss["correlation_Q0_Lambda"], loss["condition_number_jacobian"]))
+    if loss["Lambda_interval_95_permille"]:
+        print("   95%% interval on Lambda from the profile: %.2f to %.2f per mille per %%"
+              % tuple(loss["Lambda_interval_95_permille"]))
     print("   as submitted: Q0 = 540, tau = 4.0 ps per %% of response (%s)"
           % loss["previous_submission_values"]["status"])
 
