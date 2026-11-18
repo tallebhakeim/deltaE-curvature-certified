@@ -1,0 +1,14 @@
+{
+  "title": "deltaE-curvature-certified: model, validation and robustness scripts for 'Curvature and Stress Effects in Contour-Mode Delta-E Effect Magnetometers: A Cross-Validated Model of One Fabrication Process, Conditional Loss Scaling, and Yield Bounds'",
+  "upload_type": "software",
+  "description": "Python model of curvature and residual-stress effects in contour-mode Delta-E effect magnetometers (laminated plate, magnetoelastic anisotropy, thickness-integrated Delta-E response, quality factor from a magnetoelastic loss law), with held-out cross-validation on the measured device population of Matyushov et al., Adv. Mater. Technol. 6, 2100294 (2021), practical identifiability, guaranteed population envelopes, and Monte-Carlo intervals on the frequency scaling of the loss (fixed seed). Every figure and number of the manuscript submitted to the IEEE Sensors Journal (H. Talleb, 'Curvature and Stress Effects in Contour-Mode Delta-E Effect Magnetometers: A Cross-Validated Model of One Fabrication Process, Conditional Loss Scaling, and Yield Bounds') is produced by a deterministic script. Measured values of the cited works are recovered from the vector content of their published figures by digitize_paper_figures.py.",
+  "creators": [
+    {
+      "name": "Talleb, Hakeim",
+      "affiliation": "Sorbonne Universite, CNRS, GeePs, Paris; Universite Paris-Saclay, CentraleSupelec, CNRS, GeePs, Gif-sur-Yvette",
+      "orcid": "0000-0002-2734-6242"
+    }
+  ],
+  "license": "MIT",
+  "keywords": ["Delta-E effect", "magnetoelectric sensor", "residual stress", "curvature", "quality factor", "cross-validation", "identifiability", "uncertainty quantification"]
+}

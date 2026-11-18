@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "deltaE-curvature-certified"
+version: 1.0.0
+authors:
+  - family-names: Talleb
+    given-names: Hakeim
+    orcid: "https://orcid.org/0000-0002-2734-6242"
+    affiliation: "Sorbonne Université, CNRS, GeePs; Université Paris-Saclay, CentraleSupélec, CNRS, GeePs"
+license: MIT
+repository-code: "https://github.com/tallebhakeim/deltaE-curvature-certified"
+date-released: 2026-11-18

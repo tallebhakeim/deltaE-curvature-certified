@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Code Ocean entry point: regenerates every figure and number of the manuscript.
-# Runtime is about 60 s on a single core; there is no random number generation,
-# so the output is bit-for-bit identical on every run.
+# Random sampling (run_robustness.py) uses a fixed seed, so the output is
+# bit-for-bit identical on every run.
 set -e
 cd "$(dirname "$0")"
 OUT="${CO_RESULTS_FOLDER:-results}"
@@ -15,8 +15,12 @@ python3 run_repro.py               # Figs. 3, 5
 python3 run_extensions.py          # Figs. 8, 9
 python3 run_fe2d.py                # Fig. 10
 python3 run_fieldmaps.py           # Figs. 2, 11
+python3 run_crossvalidation.py     # Fig. 2
+python3 run_loss_scaling.py        # loss scaling data
+python3 run_robustness.py          # Fig. 3, Fig. S9, uncertainty intervals
+python3 run_bounds_population.py   # Fig. 5
 python3 run_graphical_abstract.py  # graphical abstract
 
 mv -f *.png "$OUT"/ 2>/dev/null || true
-cp -f validation.json "$OUT"/ 2>/dev/null || true
+cp -f *.json "$OUT"/ 2>/dev/null || true
 echo "== Done: see $OUT =="

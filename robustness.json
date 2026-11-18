@@ -1,0 +1,215 @@
+{
+ "loss_scaling_exponent": {
+  "all four points": {
+   "points": [
+    "246",
+    "138",
+    "nan",
+    "dur"
+   ],
+   "frequency_span": 33144.70493128537,
+   "n_median": 0.2054072678675826,
+   "n_ci95": [
+    0.16545999207941206,
+    0.24898397254924334
+   ],
+   "excludes_n_eq_1": true,
+   "excludes_n_eq_minus_1": true
+  },
+  "without the 7.4 kHz point": {
+   "points": [
+    "246",
+    "138",
+    "nan"
+   ],
+   "frequency_span": 1.7826086956521738,
+   "n_median": 1.0405342675977267,
+   "n_ci95": [
+    -0.23989515312140347,
+    2.473307539474474
+   ],
+   "excludes_n_eq_1": false,
+   "excludes_n_eq_minus_1": true
+  },
+  "without [33]": {
+   "points": [
+    "246",
+    "138",
+    "dur"
+   ],
+   "frequency_span": 33144.70493128537,
+   "n_median": 0.217122104940182,
+   "n_ci95": [
+    0.1656627272971837,
+    0.2686519333550197
+   ],
+   "excludes_n_eq_1": true,
+   "excludes_n_eq_minus_1": true
+  },
+  "without [1]": {
+   "points": [
+    "nan",
+    "dur"
+   ],
+   "frequency_span": 28967.933171651846,
+   "n_median": 0.18204882192233324,
+   "n_ci95": [
+    0.1453779890922265,
+    0.22452692701107807
+   ],
+   "excludes_n_eq_1": true,
+   "excludes_n_eq_minus_1": true
+  },
+  "[1] alone (same wafer, same process)": {
+   "points": [
+    "246",
+    "138"
+   ],
+   "frequency_span": 1.7826086956521738,
+   "n_median": 1.3288516497640128,
+   "n_ci95": [
+    -0.0820019878908086,
+    2.823563060413508
+   ],
+   "excludes_n_eq_1": false,
+   "excludes_n_eq_minus_1": true
+  }
+ },
+ "Lambda_points_ci95_median": {
+  "[1], 246 MHz": [
+   0.003916897151984755,
+   0.007189133955059217,
+   0.011976768033215167
+  ],
+  "[1], 138 MHz": [
+   0.0016855602254231446,
+   0.0033204497995945456,
+   0.0056206463640425565
+  ],
+  "Nan 2013, 215 MHz": [
+   0.0028165220080020766,
+   0.0035753521012017696,
+   0.004680021542731254
+  ],
+  "Durdaut 2020, 7.4 kHz": [
+   0.0003920538988281155,
+   0.0005562423187732026,
+   0.0007242429129898187
+  ]
+ },
+ "platform_effect_needed": {
+  "observed_growth_ci95": [
+   6.711329182554305,
+   12.970774211175835,
+   24.311360501811283
+  ],
+  "frequency_span": 33144.70493128537,
+  "factor_needed_for_n_eq_1_ci95": [
+   1363.3426968407307,
+   2555.3374371999585,
+   4938.62009611426
+  ],
+  "factor_needed_for_n_eq_minus_1_ci95": [
+   222445.02545248708,
+   429912.4839597488,
+   805792.8703106408
+  ],
+  "observed_platform_factors": {
+   "between the two families of [1] (same wafer)": 2.154998179385146,
+   "[33] against the nearer family of [1]": 1.2290449149029983
+  },
+  "draws_dropped_nonpositive_Lambda": 21
+ },
+ "detectivity": [
+  {
+   "family": "[1], 246 MHz",
+   "n": 12,
+   "compression_measured_point": 2.081011104299871,
+   "compression_predicted_point": 3.070022400580066,
+   "compression_measured_ci95": [
+    1.05552808196651,
+    2.0908216821633525,
+    4.552174080185037
+   ],
+   "compression_predicted_ci95": [
+    1.9223738079623844,
+    2.9838682263563667,
+    4.148331722148693
+   ],
+   "overstatement_ratio_ci95": [
+    0.5983843730327392,
+    1.3129465736775292,
+    2.7954073313027514
+   ],
+   "slope_measured_ci95": [
+    -0.040946540589057175,
+    0.3829055184233933,
+    0.680965442141334
+   ],
+   "slope_predicted_ci95": [
+    0.49754412861846753,
+    0.6602582257595373,
+    0.7882442902269244
+   ],
+   "slope_if_Q_constant": 1.0,
+   "measured_slope_below_1": true
+  },
+  {
+   "family": "[1], 138 MHz",
+   "n": 13,
+   "compression_measured_point": 2.5171350162881634,
+   "compression_predicted_point": 3.8073239500989637,
+   "compression_measured_ci95": [
+    1.3741354169710256,
+    2.439133801551847,
+    4.497154082643504
+   ],
+   "compression_predicted_ci95": [
+    2.2248102292829084,
+    3.656011700860825,
+    5.429650854180472
+   ],
+   "overstatement_ratio_ci95": [
+    0.9767467693374863,
+    1.5359500823322456,
+    2.4995545192060504
+   ],
+   "slope_measured_ci95": [
+    0.516234924056773,
+    0.730524504998296,
+    0.918724564489273
+   ],
+   "slope_predicted_ci95": [
+    0.5321328849622751,
+    0.6704196759165977,
+    0.7881681017444673
+   ],
+   "slope_if_Q_constant": 1.0,
+   "measured_slope_below_1": true
+  }
+ ],
+ "joint_region_Q0_Lambda": {
+  "Q0": 522.9947623029482,
+  "Lambda": 0.004814159187898466,
+  "n": 25,
+  "sse_min": 472256.3350622163,
+  "sse_95": 612788.8232868155,
+  "Q0_range_95": [
+   375.31380753138075,
+   711.5899581589958
+  ],
+  "Lambda_range_95_permille": [
+   1.7991631799163181,
+   10.610878661087865
+  ],
+  "edge_of_grid": false
+ },
+ "assumptions": {
+  "Nan_Q_uniform_rel": 0.1,
+  "Durdaut_Q_uniform_rel": 0.05,
+  "measured_Q_uniform_rel": 0.05,
+  "seed": 20261118,
+  "n_monte_carlo": 20000,
+  "n_bootstrap": 2000
+ }
+}

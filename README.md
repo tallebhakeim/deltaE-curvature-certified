@@ -132,13 +132,15 @@ Voir `REVISION_NOTES.md` pour les chiffres et les deux défauts numériques corr
 | `run_crossvalidation.py` | validation hors échantillon, transfert entre familles | `crossvalidation.json`, `fig_crossvalidation.png` |
 | `run_identifiability.py` | identifiabilité pratique des constantes globales | `identifiability.json`, `fig_identifiability.png` |
 | `run_bounds_population.py` | enveloppe garantie et couverture de la population | `bounds_population.json`, `fig_bounds_population.png` |
+| `run_robustness.py` | intervalles Monte-Carlo de l'exposant de perte (graine fixe 20261118), région jointe (Q0, Λ), intervalles de détectivité (resoumission Sensors-114910-2026) | `robustness.json`, `fig_loss_scaling_ci.png` (Fig. 3), `fig_joint_region.png` (Fig. S9) |
 
 `run_validation.py` a été porté sur les modèles analytiques et son ajustement des
 constantes de perte reparamétré ; `run_graphical_abstract.py` suit automatiquement,
 puisqu'il lit `validation.json`.
 
 Ordre d'exécution : `run_validation.py`, `run_crossvalidation.py`,
-`run_identifiability.py`, `run_bounds_population.py`, `run_graphical_abstract.py`,
+`run_identifiability.py`, `run_bounds_population.py`, `run_loss_scaling.py`,
+`run_robustness.py`, `run_graphical_abstract.py`,
 puis `node build_manuscript.js`, `node build_supplementary.js`,
 `node build_cover_letter.js`.
 
@@ -159,3 +161,7 @@ explicite), et le refit local pour voir si tau tombe dans notre intervalle à 95
 différant que d'un facteur 1,8 (0,70 contre 0,56 quand on se trompe de fréquence).
 C'est précisément pourquoi une troisième famille, à une fréquence nettement
 différente, vaudrait beaucoup plus que dix dispositifs de plus au même endroit.
+
+## Licence et citation
+
+Code sous licence MIT (fichier `LICENSE`). Archive Zenodo : DOI à venir avec la release v1.0.0.
