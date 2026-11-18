@@ -164,4 +164,4 @@ différente, vaudrait beaucoup plus que dix dispositifs de plus au même endroit
 
 ## Licence et citation
 
-Code sous licence MIT (fichier `LICENSE`). Archive Zenodo : DOI à venir avec la release v1.0.0.
+Code sous licence MIT (fichier `LICENSE`). Archive Zenodo : https://doi.org/10.5281/zenodo.24350567 (concept DOI, toutes versions) ; v1.0.0 = https://doi.org/10.5281/zenodo.24350568.

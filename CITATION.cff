@@ -7,6 +7,11 @@ authors:
     given-names: Hakeim
     orcid: "https://orcid.org/0000-0002-2734-6242"
     affiliation: "Sorbonne Université, CNRS, GeePs; Université Paris-Saclay, CentraleSupélec, CNRS, GeePs"
+doi: 10.5281/zenodo.24350568
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24350567
+    description: Concept DOI (all versions)
 license: MIT
 repository-code: "https://github.com/tallebhakeim/deltaE-curvature-certified"
 date-released: 2026-11-18
